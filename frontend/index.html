@@ -1,0 +1,70 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Video Upload Platform</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; text-align: center; }
+    input, button { margin: 10px; }
+    video { width: 100%; max-width: 600px; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <h1>Video Upload Platform</h1>
+  <input type="file" id="fileInput" accept="video/*">
+  <button onclick="uploadVideo()">Upload Video</button>
+
+  <h2>Uploaded Videos</h2>
+  <div id="videos"></div>
+
+  <script>
+    async function uploadVideo() {
+      const fileInput = document.getElementById("fileInput");
+      const file = fileInput.files[0];
+      if (!file) return alert("Please select a video to upload");
+
+      const formData = new FormData();
+      formData.append("video", file);
+
+      try {
+        const response = await fetch("/upload", {
+          method: "POST",
+          body: formData,
+        });
+        const result = await response.json();
+        if (response.ok) {
+          alert("Video uploaded successfully!");
+          fetchVideos();
+        } else {
+          alert(result.error || "Upload failed");
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Error uploading video");
+      }
+    }
+
+    async function fetchVideos() {
+      try {
+        const response = await fetch("/videos");
+        const result = await response.json();
+        const container = document.getElementById("videos");
+        container.innerHTML = "";
+        result.videos.forEach((url) => {
+          const video = document.createElement("video");
+          video.src = url;
+          video.controls = true;
+          container.appendChild(video);
+        });
+      } catch (err) {
+        console.error(err);
+        alert("Error fetching videos");
+      }
+    }
+
+    fetchVideos();
+  </script>
+</body>
+</html>
